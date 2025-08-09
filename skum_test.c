@@ -3,6 +3,6 @@
 int main(void)
 {
         foo_list foo;
-        foo.head->data;
+        foo.head = NULL;
         return 0;
 }
