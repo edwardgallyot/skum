@@ -39,10 +39,7 @@ RUN_TEST(`Include stdio for C', C_INCLUDE(<stdio.h>), `#include <stdio.h>') dnl
 dnl
 RUN_TEST(`Include third-party for C', C_INCLUDE("./cool.h"), `#include "./cool.h"') dnl
 dnl
-RUN_TEST(`Define for C', C_DEFINE(i32, int32_t), `#define i32 int32_t') dnl
-dnl
 dnl C structure definitions
-dnl
 dnl
 RUN_TEST(`C struct forward declare', C_FORWARD_STRUCT(`foo'), `typedef struct __foo__ foo;') dnl
 dnl
@@ -62,12 +59,49 @@ typedef struct __foo__ {
 } foo;')dnl
 dnl
 dnl
+dnl Result type definition
+dnl
+RUN_TEST(`Define result types',dnl
+DEFINE_RESULT_TYPES(i32)dnl
+RESULT_T, `i32_result')dnl
+dnl
+dnl
+RUN_TEST(`Undefine result types',dnl
+DEFINE_RESULT_TYPES(i32)dnl
+UNDEFINE_RESULT_TYPES`'dnl
+RESULT_T, `RESULT_T')dnl
+dnl
+dnl
+RUN_TEST(`C foo Result Definition', RESULT_C_STRUCT(foo), 
+`
+typedef struct __foo_result__ foo_result;
+typedef struct __foo_result__ {
+    foo* ok;
+    union {
+        const char* err; 
+        size_t is_err; 
+    };
+} foo_result;')dnl
+dnl
+RUN_TEST(`C size_t Result Definition', RESULT_C_STRUCT(size_t), 
+`
+typedef struct __size_t_result__ size_t_result;
+typedef struct __size_t_result__ {
+    size_t* ok;
+    union {
+        const char* err; 
+        size_t is_err; 
+    };
+} size_t_result;')dnl
+dnl
+dnl
 dnl Linked list definitions
 dnl
 dnl We test for a generic list where T=i32
 dnl
 RUN_TEST(`C Linked i32 List Definition', LIST_C_STRUCT(i32), 
 `
+typedef struct __i32_list__ i32_list;
 typedef struct __i32_list__ {
     i32_list_node* head;
 } i32_list;')dnl
@@ -92,8 +126,21 @@ typedef struct __foo_list_node__ {
     foo_list_node* next;
 } foo_list_node;
 
+typedef struct __foo_list__ foo_list;
 typedef struct __foo_list__ {
     foo_list_node* head;
 } foo_list;')dnl
+dnl
+dnl
+dnl
+dnl RUN_TEST(`C Linked List allocate node function', LIST_NODE_C_ALLOC(foo), 
+dnl `
+dnl inline foo_list_node_result foo_list_node_alloc(allocator* alloc, size_t count)
+dnl {
+dnl     foo_list_node* res = allocator_alloc(alloc, sizeof(foo_list_node) * count);
+dnl     if (!res) return foo_list_node_err("Failed to allocate a foo");
+dnl     return foo_list_node_ok(res);
+dnl }
+dnl ')dnl
 dnl
 dnl

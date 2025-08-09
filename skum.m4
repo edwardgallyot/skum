@@ -1,5 +1,4 @@
 dnl
-dnl
 dnl SKUM (Some Kind Useful m4) Macros
 dnl
 dnl Some kind of useful m4 for generating C code
@@ -14,6 +13,8 @@ dnl begin with a hash (I daren't even write it here!)
 dnl
 changecom(__BEGIN_COMMENT__, __END_COMMENT__) dnl
 dnl
+dnl Create CPP directives.
+dnl ======================
 dnl
 dnl (function) C_PRAGMA
 dnl (description) Does a C #pragma foo: C_PRAGMA(foo)
@@ -27,14 +28,6 @@ dnl (param) The name of the pragma.
 dnl
 define(`C_INCLUDE', `#include $1') dnl
 dnl
-dnl (function) C_DEFINE
-dnl (description) Does a #define foo: C_DEFINE(foo)
-dnl (param) The name of the pragma.
-dnl
-define(`C_DEFINE', `#define $1 $2') dnl
-dnl
-dnl
-dnl 
 dnl
 dnl Create C structures.
 dnl ====================
@@ -78,8 +71,36 @@ define(`FIELD_V', $2)dnl
 undefine(`FIELD_T', `FIELD_V')dnl
 ') dnl
 dnl
-dnl Create a generic C list.
-dnl ========================
+dnl Create a generic C result type for any T.
+dnl ========================================
+dnl 
+define(`DEFINE_RESULT_TYPES', `dnl
+define(`RESULT_T_RAW', $1)dnl
+define(`RESULT_T', RESULT_T_RAW`'_result)dnl
+define(`RESULT_DATA_T', RESULT_T_RAW)dnl
+')dnl
+dnl
+define(`UNDEFINE_RESULT_TYPES', `dnl
+undefine(`RESULT_T_RAW', `RESULT_T')dnl
+')dnl
+dnl
+dnl
+define(`RESULT_C_STRUCT', `dnl
+DEFINE_RESULT_TYPES($1)dnl
+C_FORWARD_STRUCT(RESULT_T)
+C_STRUCT_BEGIN(RESULT_T)
+C_STRUCT_FIELD(RESULT_DATA_T*, ok)
+    union {
+    C_STRUCT_FIELD(const char*, err) 
+    C_STRUCT_FIELD(size_t, is_err) 
+    };
+C_STRUCT_END(RESULT_T)dnl
+UNDEFINE_RESULT_TYPES`'dnl
+')dnl
+dnl
+dnl
+dnl Create a generic C list for any T.
+dnl ==================================
 dnl
 dnl (function) DEFINE_LIST_TYPES
 dnl (description) Defines all the types we need for a list
@@ -105,6 +126,7 @@ dnl (param) T the type of the data in the list.
 dnl
 define(LIST_C_STRUCT, `dnl
 DEFINE_LIST_TYPES($1)dnl
+C_FORWARD_STRUCT(LIST_T)
 C_STRUCT_BEGIN(LIST_T)
 C_STRUCT_FIELD(LIST_NODE_T*, head)
 C_STRUCT_END(LIST_T)dnl
@@ -136,3 +158,13 @@ LIST_NODE_C_STRUCT($1)dnl
 LIST_C_STRUCT($1)dnl
 ')
 dnl
+dnl
+dnl (function) LIST_NODE_ALLOC
+dnl (description) Generates an allocator function for a list node of T. LIST_NODE_NEW(T).
+dnl (param) T the type to generate for.
+dnl 
+define(LIST_NODE_C_ALLOC, 
+DEFINE_LIST_TYPES($1)dnl
+
+UNDEFINE_LIST_TYPES`'dnl
+)
