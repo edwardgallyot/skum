@@ -28,16 +28,6 @@ dnl (param) The name of the pragma.
 dnl
 define(`C_INCLUDE', `#include $1') dnl
 dnl
-dnl Create C allocator functions
-dnl ============================
-dnl
-define(`C_ALLOC_FN_SIG', `dnl
-define(`C_ALLOC_T', $1)dnl
-define(`C_ALLOC_FN_SIG_T', `dnl
-`C_ALLOC_T`'_alloc(allocator* alloc, size_t count)'')dnl
-C_ALLOC_FN_SIG_T()dnl
-')
-dnl
 dnl Create C structures.
 dnl ====================
 dnl
@@ -165,6 +155,59 @@ RESULT_C_ERR_FN($1)
 RESULT_C_OK_FN($1)dnl
 ')
 dnl
+dnl Create C allocator functions for any T
+dnl ======================================
+dnl
+dnl (function) DEFINE_ALLOC_TYPES
+dnl (description) Defines allocation types for C
+dnl (params) T  
+dnl
+define(`DEFINE_ALLOC_TYPES', `dnl
+define(`C_ALLOC_T', $1)dnl
+')dnl
+dnl
+define(`UNDEFINE_ALLOC_TYPES', `dnl
+undefine(`C_ALLOC_T')dnl
+')dnl
+dnl
+define(`C_ALLOCATOR', `
+C_FORWARD_STRUCT(allocator)
+C_STRUCT_BEGIN(allocator)
+C_STRUCT_FIELD(void*, mem)
+C_STRUCT_FIELD(size_t, count)
+C_STRUCT_FIELD(size_t, capacity)
+C_STRUCT_END(allocator)
+')
+dnl
+define(`C_SHARED_ALLOC', `dnl
+void* allocator_alloc(allocator* alloc, size_t num_bytes)
+{
+    if (!alloc) return NULL;
+    size_t req_count = alloc->count + num_bytes;
+    if (req_count > alloc->capacity) NULL;
+    void* result = ((u8*)alloc->mem) + alloc->count;
+    alloc->count = req_count;
+    return result;
+}
+')
+dnl
+dnl (function) C_ALLOC_FN
+dnl (description)
+dnl (param) T, the type to alloc
+dnl
+define(`C_ALLOC_FN', `dnl
+DEFINE_ALLOC_TYPES($1)
+DEFINE_RESULT_TYPES($1)
+static inline RESULT_T C_ALLOC_T`'_alloc(allocator* alloc, size_t count)
+{
+    RESULT_DATA_T* res = (RESULT_DATA_T*)allocator_alloc(alloc, sizeof(RESULT_DATA_T) * count);
+    if (!res) return ERR_FN`'(res, "Failed to allocate memory for RESULT_DATA_T");
+    return OK_FN`'(res);
+}
+UNDEFINE_ALLOC_TYPES`'dnl
+UNDEFINE_RESULT_TYPES`'dnl
+')
+dnl
 dnl Create a generic C list for any T.
 dnl ==================================
 dnl
@@ -224,20 +267,3 @@ LIST_C_STRUCT($1)dnl
 ')
 dnl
 dnl
-dnl (function) LIST_NODE_ALLOC
-dnl (description) Generates an allocator function for a list node of T. LIST_NODE_NEW(T).
-dnl (param) T the type to generate for.
-dnl 
-define(LIST_NODE_C_ALLOC, `dnl
-DEFINE_LIST_TYPES($1)dnl
-DEFINE_RESULT_TYPES(LIST_NODE_T)dnl
-static inline RESULT_T C_ALLOC_FN_SIG(LIST_NODE_T)
-{
-    RESULT_DATA_T`'* res = allocator_alloc(alloc, sizeof(LIST_NODE_T) * count);
-    if (!res) return ERR_FN`'(res, "Failed to allocate memory for RESULT_DATA_T");
-    return OK_FN`'(res);
-}
-UNDEFINE_LIST_TYPES`'dnl
-UNDEFINE_RESULT_TYPES`'dnl
-')dnl
-

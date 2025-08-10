@@ -11,9 +11,7 @@ define(`TEST_NAME', $1) dnl
 define(`IN', $2) dnl
 define(`OUT', $3) dnl
 ifelse(IN, OUT, 
-`define(`RES', `[PASS] TEST_NAME.
-Got expected output: 
-OUT')', 
+`define(`RES', `[PASS] TEST_NAME.')', 
 `define(`RES', `[FAIL] TEST_NAME.
 Unexpected output: 
 IN 
@@ -39,8 +37,9 @@ RUN_TEST(`Include stdio for C', C_INCLUDE(<stdio.h>), `#include <stdio.h>') dnl
 dnl
 RUN_TEST(`Include third-party for C', C_INCLUDE("./cool.h"), `#include "./cool.h"') dnl
 dnl
+dnl C type definitions
 dnl
-RUN_TEST(`Create a C allocator function', C_ALLOC_FN_SIG(foo), `foo_alloc(allocator* alloc, size_t count)')dnl
+
 dnl
 dnl C structure definitions
 dnl
@@ -61,6 +60,40 @@ typedef struct __foo__ {
     i32 bar;
 } foo;')dnl
 dnl
+dnl C allocator definitions
+dnl
+RUN_TEST(`C allocator definition', C_ALLOCATOR,
+`
+typedef struct __allocator__ allocator;
+typedef struct __allocator__ {
+    void* mem;
+    size_t count;
+    size_t capacity;
+} allocator;
+')dnl
+dnl
+RUN_TEST(`C allocator void* function', C_SHARED_ALLOC,
+`
+void* allocator_alloc(allocator* alloc, size_t num_bytes)
+{
+    if (!alloc) return NULL;
+    size_t req_count = alloc->count + num_bytes;
+    if (req_count > alloc->capacity) NULL;
+    void* result = ((u8*)alloc->mem) + alloc->count;
+    alloc->count = req_count;
+    return result;
+}
+')dnl
+dnl
+RUN_TEST(`Create a C allocator function', C_ALLOC_FN(foo), 
+`
+static inline foo_result foo_alloc(allocator* alloc, size_t count)
+{
+    foo* res = (foo*)allocator_alloc(alloc, sizeof(foo) * count);
+    if (!res) return foo_err(res, "Failed to allocate memory for foo");
+    return foo_ok(res);
+}
+')dnl
 dnl
 dnl Result type definition
 dnl
@@ -184,11 +217,11 @@ typedef struct __foo_list__ {
 dnl
 dnl
 dnl
-RUN_TEST(`C Linked List allocate node function', LIST_NODE_C_ALLOC(foo), 
+RUN_TEST(`C Linked List allocate node function', C_ALLOC_FN(foo_list_node), 
 `
 static inline foo_list_node_result foo_list_node_alloc(allocator* alloc, size_t count)
 {
-    foo_list_node* res = allocator_alloc(alloc, sizeof(foo_list_node) * count);
+    foo_list_node* res = (foo_list_node*)allocator_alloc(alloc, sizeof(foo_list_node) * count);
     if (!res) return foo_list_node_err(res, "Failed to allocate memory for foo_list_node");
     return foo_list_node_ok(res);
 }

@@ -36,18 +36,23 @@ test tests[NUM_TESTS] = {
         { test_result_ok, "Testing if result ok works"}
 };
 
+void print_test_result(const char* name, void_result res)
+{
+        if (!res.is_err) {
+                printf("[PASS] %s\n", name);
+        } else {
+                printf("[FAIL] %s \nOutput:\n %s \n", name, res.err);
+        }
+}
+
 void run_tests()
 {
-        for (int t = 0; t < NUM_TESTS; ++t)
-        {
+        for (int t = 0; t < NUM_TESTS; ++t) {
                 const char* name = tests[t].name;
                 void_result res = tests[t].func();
-                if (!res.is_err) {
-                        printf("[PASS] %s\n", name);
-                } else {
-                        printf("[FAIL] %s \nOutput:\n %s \n", name, res.err);
-                }
+                print_test_result(name, res);
         }
+
 }
 
 int main(void)
