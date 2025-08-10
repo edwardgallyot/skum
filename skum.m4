@@ -83,6 +83,10 @@ dnl
 dnl Create a generic C result type for any T.
 dnl ========================================
 dnl 
+dnl (function) DEFINE_RESULT_TYPES
+dnl (description) Defines all the types we need for a result
+dnl (params) T the data in the result.
+dnl
 define(`DEFINE_RESULT_TYPES', `dnl
 define(`RESULT_T_RAW', $1)dnl
 define(`RESULT_T', RESULT_T_RAW`'_result)dnl
@@ -91,9 +95,17 @@ define(`ERR_FN', RESULT_DATA_T`'_err)dnl
 define(`OK_FN', RESULT_DATA_T`'_ok)dnl
 ')dnl
 dnl
+dnl (function) UNDEFINE_RESULT_TYPES
+dnl (description) Undefines all the types we need for a list. 
+dnl               Should mirror a DEFINE_RESULT_TYPES call.
+dnl
 define(`UNDEFINE_RESULT_TYPES', `dnl
 undefine(`RESULT_T_RAW', `RESULT_T', `RESULT_DATA_T', `ERR_FN', `OK_FN')dnl
 ')dnl
+dnl
+dnl (function) RESULT_C_STRUCT 
+dnl (description) Creates the result struct for a T 
+dnl (param) T the type of the data in the result.
 dnl
 define(`RESULT_C_STRUCT', `dnl
 DEFINE_RESULT_TYPES($1)dnl
@@ -111,7 +123,9 @@ C_STRUCT_END(RESULT_T)
 UNDEFINE_RESULT_TYPES`'dnl
 ')dnl
 dnl
-dnl
+dnl (function) RESULT_C_ERR_FN
+dnl (description) Creates the error function for a T.
+dnl (param) T the type of the data in the result.
 dnl
 define(`RESULT_C_ERR_FN', `dnl
 DEFINE_RESULT_TYPES($1)dnl
@@ -125,6 +139,9 @@ static inline RESULT_T ERR_FN()(RESULT_DATA_T* t, const char* err)
 UNDEFINE_RESULT_TYPES`'dnl
 ')
 dnl
+dnl (function) RESULT_C_OK_FN
+dnl (description) Creates the ok function for a T.
+dnl (param) T the type of the data in the result.
 dnl
 define(`RESULT_C_OK_FN', `dnl
 DEFINE_RESULT_TYPES($1)dnl
@@ -138,6 +155,9 @@ static inline RESULT_T RESULT_DATA_T`'_ok(RESULT_DATA_T* t)
 UNDEFINE_RESULT_TYPES()dnl
 ')
 dnl
+dnl (function) RESULT_C_FULL
+dnl (description) Simply combines RESULT_C_STRUCT, RESULT_C_ERR_FN and RESULT_C_OK_FN.
+dnl (param) T the type of the data in the result.
 dnl
 define(RESULT_C_FULL, `dnl
 RESULT_C_STRUCT($1)
@@ -150,7 +170,7 @@ dnl ==================================
 dnl
 dnl (function) DEFINE_LIST_TYPES
 dnl (description) Defines all the types we need for a list
-dnl (params) T the type you want to  
+dnl (param) T the type of the data in the list.
 dnl
 define(`DEFINE_LIST_TYPES',`dnl
 define(`LIST_DATA_T', $1)dnl
