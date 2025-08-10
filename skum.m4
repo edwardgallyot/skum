@@ -28,6 +28,15 @@ dnl (param) The name of the pragma.
 dnl
 define(`C_INCLUDE', `#include $1') dnl
 dnl
+dnl Create C allocator functions
+dnl ============================
+dnl
+define(`C_ALLOC_FN_SIG', `dnl
+define(`C_ALLOC_T', $1)dnl
+define(`C_ALLOC_FN_SIG_T', `dnl
+`C_ALLOC_T`'_alloc(allocator* alloc, size_t count)'')dnl
+C_ALLOC_FN_SIG_T()dnl
+')
 dnl
 dnl Create C structures.
 dnl ====================
@@ -78,26 +87,63 @@ define(`DEFINE_RESULT_TYPES', `dnl
 define(`RESULT_T_RAW', $1)dnl
 define(`RESULT_T', RESULT_T_RAW`'_result)dnl
 define(`RESULT_DATA_T', RESULT_T_RAW)dnl
+define(`ERR_FN', RESULT_DATA_T`'_err)dnl
+define(`OK_FN', RESULT_DATA_T`'_ok)dnl
 ')dnl
 dnl
 define(`UNDEFINE_RESULT_TYPES', `dnl
-undefine(`RESULT_T_RAW', `RESULT_T')dnl
+undefine(`RESULT_T_RAW', `RESULT_T', `RESULT_DATA_T', `ERR_FN', `OK_FN')dnl
 ')dnl
-dnl
 dnl
 define(`RESULT_C_STRUCT', `dnl
 DEFINE_RESULT_TYPES($1)dnl
 C_FORWARD_STRUCT(RESULT_T)
 C_STRUCT_BEGIN(RESULT_T)
-C_STRUCT_FIELD(RESULT_DATA_T*, ok)
+    union {
+    C_STRUCT_FIELD(RESULT_DATA_T*, ok)
+    C_STRUCT_FIELD(size_t, is_ok) 
+    };
     union {
     C_STRUCT_FIELD(const char*, err) 
     C_STRUCT_FIELD(size_t, is_err) 
     };
-C_STRUCT_END(RESULT_T)dnl
+C_STRUCT_END(RESULT_T)
 UNDEFINE_RESULT_TYPES`'dnl
 ')dnl
 dnl
+dnl
+dnl
+define(`RESULT_C_ERR_FN', `dnl
+DEFINE_RESULT_TYPES($1)dnl
+static inline RESULT_T ERR_FN()(RESULT_DATA_T* t, const char* err)
+{
+    RESULT_T res;
+    res.err = err;
+    res.is_ok = 0;
+    return res;
+}
+UNDEFINE_RESULT_TYPES`'dnl
+')
+dnl
+dnl
+define(`RESULT_C_OK_FN', `dnl
+DEFINE_RESULT_TYPES($1)dnl
+static inline RESULT_T RESULT_DATA_T`'_ok(RESULT_DATA_T* t)
+{
+    RESULT_T res;
+    res.ok = t;
+    res.is_err = 0;
+    return res;
+}
+UNDEFINE_RESULT_TYPES()dnl
+')
+dnl
+dnl
+define(RESULT_C_FULL, `dnl
+RESULT_C_STRUCT($1)
+RESULT_C_ERR_FN($1)
+RESULT_C_OK_FN($1)dnl
+')
 dnl
 dnl Create a generic C list for any T.
 dnl ==================================
@@ -117,8 +163,7 @@ dnl (description) Undefines all the types we need for a list.
 dnl               Should mirror a DEFINE_LIST_TYPES call.
 dnl
 define(`UNDEFINE_LIST_TYPES', `dnl
-undefine(`LIST_DATA_T', `LIST_T', `LIST_NODE_T')dnl
-')dnl
+undefine(`LIST_DATA_T', `LIST_T', `LIST_NODE_T')')dnl
 dnl 
 dnl (function) LIST_C_STRUCT 
 dnl (description) Creates a list for a type foo. LIST_C_STRUCT(foo)
@@ -163,8 +208,16 @@ dnl (function) LIST_NODE_ALLOC
 dnl (description) Generates an allocator function for a list node of T. LIST_NODE_NEW(T).
 dnl (param) T the type to generate for.
 dnl 
-define(LIST_NODE_C_ALLOC, 
+define(LIST_NODE_C_ALLOC, `dnl
 DEFINE_LIST_TYPES($1)dnl
-
+DEFINE_RESULT_TYPES(LIST_NODE_T)dnl
+static inline RESULT_T C_ALLOC_FN_SIG(LIST_NODE_T)
+{
+    RESULT_DATA_T`'* res = allocator_alloc(alloc, sizeof(LIST_NODE_T) * count);
+    if (!res) return ERR_FN`'(res, "Failed to allocate memory for RESULT_DATA_T");
+    return OK_FN`'(res);
+}
 UNDEFINE_LIST_TYPES`'dnl
-)
+UNDEFINE_RESULT_TYPES`'dnl
+')dnl
+

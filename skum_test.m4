@@ -39,6 +39,9 @@ RUN_TEST(`Include stdio for C', C_INCLUDE(<stdio.h>), `#include <stdio.h>') dnl
 dnl
 RUN_TEST(`Include third-party for C', C_INCLUDE("./cool.h"), `#include "./cool.h"') dnl
 dnl
+dnl
+RUN_TEST(`Create a C allocator function', C_ALLOC_FN_SIG(foo), `foo_alloc(allocator* alloc, size_t count)')dnl
+dnl
 dnl C structure definitions
 dnl
 RUN_TEST(`C struct forward declare', C_FORWARD_STRUCT(`foo'), `typedef struct __foo__ foo;') dnl
@@ -76,24 +79,72 @@ RUN_TEST(`C foo Result Definition', RESULT_C_STRUCT(foo),
 `
 typedef struct __foo_result__ foo_result;
 typedef struct __foo_result__ {
-    foo* ok;
+    union {
+        foo* ok;
+        size_t is_ok; 
+    };
     union {
         const char* err; 
         size_t is_err; 
     };
-} foo_result;')dnl
+} foo_result;
+')dnl
 dnl
-RUN_TEST(`C size_t Result Definition', RESULT_C_STRUCT(size_t), 
+dnl
+RUN_TEST(`C foo Result error function', RESULT_C_ERR_FN(foo), 
 `
-typedef struct __size_t_result__ size_t_result;
-typedef struct __size_t_result__ {
-    size_t* ok;
+static inline foo_result foo_err(foo* t, const char* err)
+{
+    foo_result res;
+    res.err = err;
+    res.is_ok = 0;
+    return res;
+}
+')dnl
+dnl
+dnl
+RUN_TEST(`C foo Result ok function', RESULT_C_OK_FN(foo), 
+`
+static inline foo_result foo_ok(foo* t)
+{
+    foo_result res;
+    res.ok = t;
+    res.is_err = 0;
+    return res;
+}
+')dnl
+dnl
+dnl
+RUN_TEST(`C foo Result full definition', RESULT_C_FULL(foo), 
+`
+typedef struct __foo_result__ foo_result;
+typedef struct __foo_result__ {
+    union {
+        foo* ok;
+        size_t is_ok; 
+    };
     union {
         const char* err; 
         size_t is_err; 
     };
-} size_t_result;')dnl
-dnl
+} foo_result;
+
+static inline foo_result foo_err(foo* t, const char* err)
+{
+    foo_result res;
+    res.err = err;
+    res.is_ok = 0;
+    return res;
+}
+
+static inline foo_result foo_ok(foo* t)
+{
+    foo_result res;
+    res.ok = t;
+    res.is_err = 0;
+    return res;
+}
+')dnl
 dnl
 dnl Linked list definitions
 dnl
@@ -133,14 +184,14 @@ typedef struct __foo_list__ {
 dnl
 dnl
 dnl
-dnl RUN_TEST(`C Linked List allocate node function', LIST_NODE_C_ALLOC(foo), 
-dnl `
-dnl inline foo_list_node_result foo_list_node_alloc(allocator* alloc, size_t count)
-dnl {
-dnl     foo_list_node* res = allocator_alloc(alloc, sizeof(foo_list_node) * count);
-dnl     if (!res) return foo_list_node_err("Failed to allocate a foo");
-dnl     return foo_list_node_ok(res);
-dnl }
-dnl ')dnl
+RUN_TEST(`C Linked List allocate node function', LIST_NODE_C_ALLOC(foo), 
+`
+static inline foo_list_node_result foo_list_node_alloc(allocator* alloc, size_t count)
+{
+    foo_list_node* res = allocator_alloc(alloc, sizeof(foo_list_node) * count);
+    if (!res) return foo_list_node_err(res, "Failed to allocate memory for foo_list_node");
+    return foo_list_node_ok(res);
+}
+')dnl
 dnl
 dnl
