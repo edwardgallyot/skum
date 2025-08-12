@@ -175,8 +175,19 @@ SLICE_T SLICE_DATA_T, [[u32_slice u32]])dnl
 dnl
 dnl
 RUN_TEST([[Undefine slice types]],dnl
-UNDEFINE_SLICE_TYPES(i32)dnl
+UNDEFINE_SLICE_TYPES(u32)dnl
 SLICE_T SLICE_DATA_T, [[SLICE_T SLICE_DATA_T]])dnl
+dnl
+dnl
+RUN_TEST([[C slice definition u32]], SLICE_C_STRUCT(u32),
+[[
+typedef struct __u32_slice__ u32_slice;
+typedef struct __u32_slice__ {
+        u32* data;
+        size_t len;
+} u32_slice;
+]])dnl
+dnl
 dnl
 
 Array definitions

@@ -183,6 +183,25 @@ UNDEFINE_ALLOC_TYPES[[]]dnl
 UNDEFINE_RESULT_TYPES[[]]dnl
 ]])dnl
 dnl
+dnl Create a generic slice for any T
+dnl ======================================
+define([[DEFINE_SLICE_TYPES]], 
+[[define(SLICE_DATA_T, $1)dnl
+define(SLICE_T, SLICE_DATA_T[[]]_slice)dnl
+]])dnl
+dnl
+define([[UNDEFINE_SLICE_TYPES]], 
+[[undefine([[SLICE_T]], [[SLICE_DATA_T]])]])dnl
+dnl
+define([[SLICE_C_STRUCT]],
+[[DEFINE_SLICE_TYPES($1)
+C_FORWARD_STRUCT(SLICE_T)
+C_STRUCT_BEGIN(SLICE_T)
+        SLICE_DATA_T* data;
+        size_t len;
+C_STRUCT_END(SLICE_T)
+UNDEFINE_SLICE_TYPES()dnl
+]])dnl
 dnl
 dnl Create a generic C array for any T
 dnl ======================================
