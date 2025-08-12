@@ -134,7 +134,7 @@ test tests[NUM_TESTS] = {
         { test_list_add, "Testing if list add works"},
         { test_array_init, "Testing if array init works"},
         { test_array_add, "Testing if array add works"},
-        { test_array_add_block, "Testing if array add works"}
+        { test_array_add_block, "Testing if array add blockj works"}
 };
 
 void print_test_result(const char* name, void_result res)
