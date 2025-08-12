@@ -119,6 +119,31 @@ void_result test_array_add_block()
                 if (array.data[i] != i) return void_err(NULL, "Array value error");
         }
         return void_ok(NULL);
+#undef ARRAY_SIZE
+}
+
+void_result test_array_pop()
+{
+#define ARRAY_SIZE 8
+        allocator alloc;
+        void_result res = init_allocator(&alloc, 1024);
+        if (res.is_err) return res;
+        i32_array array;        
+        i32_array_result init_res = i32_array_init(&array, &alloc, ARRAY_SIZE);
+        if (init_res.is_err) return void_err(NULL, init_res.err);
+        i32 to_add[ARRAY_SIZE] = {
+                1, 2, 3, 4, 5, 6, 7, 8
+        };
+        if (array.capacity != ARRAY_SIZE) return void_err(NULL, "Incorrect capacity");
+        i32_array_add_block(&array, to_add, ARRAY_SIZE);
+        if (array.count != ARRAY_SIZE) return void_err(NULL, "Incorrect count after adding ARRAY_SIZE");
+        for (size_t i = ARRAY_SIZE; i != 0 ; --i) {
+                i32_result pop_res = i32_array_pop(&array);
+                if (pop_res.is_err) return void_err(NULL, pop_res.err);
+                if (*pop_res.ok != i) return void_err(NULL, "Invalid value");
+        }
+        return void_ok(NULL);
+#undef ARRAY_SIZE
 }
 
 typedef struct __test__ {
@@ -127,14 +152,15 @@ typedef struct __test__ {
 } test;
 
 // Incre
-#define NUM_TESTS (6)
+#define NUM_TESTS (7)
 test tests[NUM_TESTS] = {
         { test_result_err, "Testing if result err works"},
         { test_result_ok, "Testing if result ok works"},
         { test_list_add, "Testing if list add works"},
         { test_array_init, "Testing if array init works"},
         { test_array_add, "Testing if array add works"},
-        { test_array_add_block, "Testing if array add block works"}
+        { test_array_add_block, "Testing if array add block works"},
+        { test_array_pop, "Testing if array pop works"}
 };
 
 void print_test_result(const char* name, void_result res)

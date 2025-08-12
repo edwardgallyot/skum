@@ -10,17 +10,17 @@ dnl
 #define i32 int32_t
 #define u8 uint8_t 
 dnl
-C_ALLOCATOR()
-C_SHARED_ALLOC()
+C_ALLOCATOR()dnl
+C_SHARED_ALLOC()dnl
 dnl
-C_STRUCT_BEGIN(foo)
+C_STRUCT_BEGIN(foo)dnl
         i32 bar;
-C_STRUCT_END(foo)
+C_STRUCT_END(foo)dnl
 dnl
-RESULT_C_FULL(foo)
-RESULT_C_FULL(void)
+RESULT_C_FULL(foo)dnl
+RESULT_C_FULL(void)dnl
 dnl
-LIST_WITH_NODE_C_STRUCTS(foo)
+LIST_WITH_NODE_C_STRUCTS(foo)dnl
 RESULT_C_FULL(foo_list_node)dnl
 RESULT_C_FULL(foo_list)dnl
 C_ALLOC_FN(foo_list_node)dnl
@@ -29,12 +29,14 @@ dnl
 LIST_WITH_NODE_C_STRUCTS(char)dnl
 dnl
 dnl
-ARRAY_C_STRUCT(i32)
-RESULT_C_FULL(i32)
-C_ALLOC_FN(i32)
+ARRAY_C_STRUCT(i32)dnl
+RESULT_C_FULL(i32)dnl
+C_ALLOC_FN(i32)dnl
 dnl
-RESULT_C_FULL(i32_array)
+RESULT_C_FULL(i32_array)dnl
 dnl
-ARRAY_C_NEW(i32)
-ARRAY_C_ADD(i32)
-ARRAY_C_ADD_BLOCK(i32)
+ARRAY_C_NEW(i32)dnl
+ARRAY_C_ADD(i32)dnl
+ARRAY_C_ADD_BLOCK(i32)dnl
+ARRAY_C_POP(i32)dnl
+dnl

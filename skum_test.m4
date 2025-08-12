@@ -232,6 +232,17 @@ static inline i32_array_result i32_array_add_block(i32_array* array, i32* to_add
 dnl
 dnl
 dnl
+RUN_TEST([[C array pop foo]], ARRAY_C_POP(foo),
+[[
+static inline foo_result foo_array_pop(foo_array* array)
+{
+        if (!array) return foo_err(NULL, "no array passed");
+        if (array->count == 0) return foo_err(NULL, "nothing in the array");
+        foo* to_return = &array->data[--array->count];
+        return foo_ok(to_return);
+}
+]])dnl
+dnl
 
 Linked list definitions
 =======================

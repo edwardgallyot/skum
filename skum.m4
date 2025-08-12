@@ -11,7 +11,7 @@ dnl First things first, turn off the comments! Since we're generating C
 dnl it's going to get really complicated if we don't as all CPP (C Pre-Processor) directives
 dnl begin with a hash (I daren't even write it here!)
 dnl
-changecom(__BEGIN_COMMENT__, __END_COMMENT__) dnl
+changecom(__BEGIN_COMMENT__, __END_COMMENT__)dnl
 changequote(`[[', `]]')dnl
 dnl
 dnl Create C structures.
@@ -102,7 +102,7 @@ static inline RESULT_T ERR_FN()(RESULT_DATA_T* t, const char* err)
         return res;
 }
 UNDEFINE_RESULT_TYPES[[]]dnl
-]])
+]])dnl
 dnl
 dnl (function) RESULT_C_OK_FN
 dnl (description) Creates the ok function for a T.
@@ -217,8 +217,8 @@ UNDEFINE_RESULT_TYPES
 DEFINE_RESULT_TYPES(ARRAY_T)dnl
 static inline RESULT_T ARRAY_T[[]]_init(ARRAY_T* array, allocator* alloc, size_t size)
 {
-        if (!array) return i32_array_err(NULL, "no array passed");
-        if (!alloc) return i32_array_err(NULL, "no alloc passed");
+        if (!array) return ERR_FN[[]](NULL, "no array passed");
+        if (!alloc) return ERR_FN[[]](NULL, "no alloc passed");
         DATA_RESULT_T data_res = ARRAY_DATA_T[[]]_alloc(alloc, size);
         if (data_res.is_err) return ERR_FN[[]](NULL, data_res.err);
         array->data = data_res.ok;
@@ -237,18 +237,18 @@ DEFINE_RESULT_TYPES($1)
 define([[DATA_RESULT_T]], RESULT_T)dnl
 UNDEFINE_RESULT_TYPES
 DEFINE_RESULT_TYPES(ARRAY_T)dnl
-static inline RESULT_T ARRAY_T[[]]_add(ARRAY_T* array, i32 to_add)
+static inline RESULT_T ARRAY_T[[]]_add(ARRAY_T* array, ARRAY_DATA_T to_add)
 {
-        if (!array) return i32_array_err(NULL, "no array passed");
-        if (array->count >= array->capacity) return i32_array_err(NULL, "out of capacity");
+        if (!array) return ERR_FN[[]](NULL, "no array passed");
+        if (array->count >= array->capacity) return ERR_FN[[]](NULL, "out of capacity");
         array->data[array->count] = to_add;
         array->count++;
-        return i32_array_ok(array);
+        return OK_FN[[]](array);
 }
 undefine([[DATA_RESULT_T]])dnl
 UNDEFINE_RESULT_TYPES()dnl
 UNDEFINE_ARRAY_TYPES()dnl
-]])
+]])dnl
 dnl
 dnl
 define([[ARRAY_C_ADD_BLOCK]], 
@@ -257,20 +257,34 @@ DEFINE_RESULT_TYPES($1)dnl
 define([[DATA_RESULT_T]], RESULT_T)dnl
 UNDEFINE_RESULT_TYPES()dnl
 DEFINE_RESULT_TYPES(ARRAY_T)dnl
-static inline RESULT_T ARRAY_T[[]]_add_block(ARRAY_T* array, i32* to_add, size_t count)
+static inline RESULT_T ARRAY_T[[]]_add_block(ARRAY_T* array, ARRAY_DATA_T* to_add, size_t count)
 {
-        if (!array) return i32_array_err(NULL, "no array passed");
-        if ((array->count + count) > array->capacity) return i32_array_err(NULL, "out of capacity");
+        if (!array) return ERR_FN[[]](NULL, "no array passed");
+        if ((array->count + count) > array->capacity) return ERR_FN[[]](NULL, "out of capacity");
         memcpy(array->data + array->count, to_add, count * sizeof(ARRAY_DATA_T));
         array->count += count;
-        return i32_array_ok(array);
+        return OK_FN[[]](array);
 }
 undefine([[DATA_RESULT_T]])dnl
 UNDEFINE_RESULT_TYPES()dnl
 UNDEFINE_ARRAY_TYPES()dnl
+]])dnl
+dnl
+dnl
+define([[ARRAY_C_POP]],
+[[DEFINE_ARRAY_TYPES($1)
+DEFINE_RESULT_TYPES($1)dnl
+static inline RESULT_T ARRAY_T[[]]_pop(ARRAY_T* array)
+{
+        if (!array) return ERR_FN()(NULL, "no array passed");
+        if (array->count == 0) return ERR_FN()(NULL, "nothing in the array");
+        ARRAY_DATA_T()* to_return = &array->data[--array->count];
+        return OK_FN()(to_return);
+}
+UNDEFINE_ARRAY_TYPES()dnl
+UNDEFINE_RESULT_TYPES()dnl
 ]])
-dnl
-dnl
+dnl 
 dnl
 dnl Create a generic C list for any T.
 dnl ==================================
