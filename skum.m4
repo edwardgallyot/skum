@@ -160,7 +160,7 @@ define([[C_SHARED_ALLOC]],
 {
         if (!alloc) return NULL;
         size_t req_count = alloc->count + num_bytes;
-        if (req_count > alloc->capacity) NULL;
+        if (req_count > alloc->capacity) return NULL;
         void* result = ((u8*)alloc->mem) + alloc->count;
         alloc->count = req_count;
         return result;
@@ -184,7 +184,7 @@ UNDEFINE_RESULT_TYPES[[]]dnl
 ]])dnl
 dnl
 dnl
-dnl Create a generic C dyn array for any T
+dnl Create a generic C array for any T
 dnl ======================================
 dnl
 define([[DEFINE_ARRAY_TYPES]],[[dnl

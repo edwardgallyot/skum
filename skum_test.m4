@@ -1,23 +1,24 @@
 dnl
 dnl
 dnl These tests are for the skum.m4 file and check each macro expands to
-dnl what we]]re expecting.
+dnl what we're expecting.
 dnl
 dnl 
 define([[RUN_TEST]],[[dnl
-define(GEN_TEST, [[dnl
-define([[TEST_MACRO]], [[dnl
-define([[TEST_NAME]], $1) dnl
-define([[IN]], $2) dnl
-define([[OUT]], $3) dnl
-ifelse(IN, OUT, 
-[[define([[RES]], [[[PASS] TEST_NAME.]])]], 
-[[define([[RES]], [[[FAIL] TEST_NAME.
+        define(GEN_TEST, [[dnl
+        define([[TEST_MACRO]], [[dnl
+        define([[TEST_NAME]], $1) dnl
+        define([[IN]], $2) dnl
+        define([[OUT]], $3) dnl
+        ifelse(IN, OUT, 
+                [[define([[RES]], [[[PASS] TEST_NAME.]])]], 
+                [[define([[RES]], [[[FAIL] TEST_NAME.
 Unexpected output: 
 IN 
 
 Expected output:
-OUT[[]]]])]]) dnl
+OUT[[]]
+]])]]) dnl
 ]])]]) dnl
 GEN_TEST($1, $2, $3) dnl
 TEST_MACRO 
@@ -66,7 +67,7 @@ static inline void* allocator_alloc(allocator* alloc, size_t num_bytes)
 {
         if (!alloc) return NULL;
         size_t req_count = alloc->count + num_bytes;
-        if (req_count > alloc->capacity) NULL;
+        if (req_count > alloc->capacity) return NULL;
         void* result = ((u8*)alloc->mem) + alloc->count;
         alloc->count = req_count;
         return result;
@@ -163,17 +164,32 @@ static inline foo_result foo_ok(foo* t)
 ]])dnl
 dnl
 
+Slice definitions
+=======================
+dnl
+dnl Slice definition
+dnl
+RUN_TEST([[Define slice types]],dnl
+DEFINE_SLICE_TYPES(u32)dnl
+SLICE_T SLICE_DATA_T, [[u32_slice u32]])dnl
+dnl
+dnl
+RUN_TEST([[Undefine slice types]],dnl
+UNDEFINE_SLICE_TYPES(i32)dnl
+SLICE_T SLICE_DATA_T, [[SLICE_T SLICE_DATA_T]])dnl
+dnl
+
 Array definitions
 =========================
 dnl
 dnl Array definition
 dnl
-RUN_TEST([[Define dyn array types]],dnl
+RUN_TEST([[Define array types]],dnl
 DEFINE_ARRAY_TYPES(i32)dnl
 ARRAY_T ARRAY_DATA_T, [[i32_array i32]])dnl
 dnl
 dnl
-RUN_TEST([[Undefine dyn array types]],dnl
+RUN_TEST([[Undefine array types]],dnl
 UNDEFINE_ARRAY_TYPES(i32)dnl
 ARRAY_T ARRAY_DATA_T, [[ARRAY_T ARRAY_DATA_T]])dnl
 dnl
@@ -310,8 +326,4 @@ static inline foo_list_result foo_list_add(foo_list* list, foo_list_node* node)
         return foo_list_ok(list);
 }
 ]])dnl
-dnl
-dnl
-dnl
-dnl
 dnl
