@@ -80,10 +80,7 @@ define([[RESULT_C_STRUCT]], [[dnl
 DEFINE_RESULT_TYPES($1)dnl
 C_FORWARD_STRUCT(RESULT_T)
 C_STRUCT_BEGIN(RESULT_T)
-        union {
-                RESULT_DATA_T[[]]* ok;
-                size_t is_ok;
-        };
+        RESULT_DATA_T[[]]* ok;
         union {
                 const char* err;
                 size_t is_err;
@@ -102,7 +99,6 @@ static inline RESULT_T ERR_FN()(RESULT_DATA_T* t, const char* err)
 {
         RESULT_T res;
         res.err = err;
-        res.is_ok = 0;
         return res;
 }
 UNDEFINE_RESULT_TYPES[[]]dnl
@@ -253,6 +249,7 @@ undefine([[DATA_RESULT_T]])dnl
 UNDEFINE_RESULT_TYPES()dnl
 UNDEFINE_ARRAY_TYPES()dnl
 ]])
+dnl
 dnl
 define([[ARRAY_C_ADD_BLOCK]], 
 [[DEFINE_ARRAY_TYPES($1)dnl

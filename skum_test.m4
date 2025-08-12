@@ -103,10 +103,7 @@ RUN_TEST([[C foo Result Definition]], RESULT_C_STRUCT(foo),
 [[
 typedef struct __foo_result__ foo_result;
 typedef struct __foo_result__ {
-        union {
-                foo* ok;
-                size_t is_ok;
-        };
+        foo* ok;
         union {
                 const char* err;
                 size_t is_err;
@@ -121,7 +118,6 @@ static inline foo_result foo_err(foo* t, const char* err)
 {
         foo_result res;
         res.err = err;
-        res.is_ok = 0;
         return res;
 }
 ]])dnl
@@ -143,10 +139,7 @@ RUN_TEST([[C foo Result full definition]], RESULT_C_FULL(foo),
 [[
 typedef struct __foo_result__ foo_result;
 typedef struct __foo_result__ {
-        union {
-                foo* ok;
-                size_t is_ok;
-        };
+        foo* ok;
         union {
                 const char* err;
                 size_t is_err;
@@ -157,7 +150,6 @@ static inline foo_result foo_err(foo* t, const char* err)
 {
         foo_result res;
         res.err = err;
-        res.is_ok = 0;
         return res;
 }
 

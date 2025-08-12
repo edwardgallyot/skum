@@ -26,7 +26,7 @@ void_result test_result_err()
 {
         static foo invalid_foo;
         foo_result result = foo_err(NULL, "Error in the foorce");
-        if (result.is_ok) return void_err(NULL, "result.is_err failed");
+        if (!result.is_err) return void_err(NULL, "result.is_err failed");
         return void_ok(NULL);
 };
 
@@ -100,6 +100,26 @@ void_result test_array_add()
 #undef ARRAY_SIZE
 }
 
+void_result test_array_add_block()
+{
+#define ARRAY_SIZE 8
+        allocator alloc;
+        void_result res = init_allocator(&alloc, 1024);
+        if (res.is_err) return res;
+        i32_array array;        
+        i32_array_result init_res = i32_array_init(&array, &alloc, ARRAY_SIZE);
+        if (init_res.is_err) return void_err(NULL, init_res.err);
+        i32 to_add[ARRAY_SIZE] = {
+                0, 1, 2, 3, 4, 5, 6, 7
+        };
+        if (array.capacity != ARRAY_SIZE) return void_err(NULL, "Incorrect capacity");
+        i32_array_add_block(&array, to_add, ARRAY_SIZE);
+        if (array.count != ARRAY_SIZE) return void_err(NULL, "Incorrect count after adding ARRAY_SIZE");
+        for (size_t i = 0; i < array.count; ++i) {
+                if (array.data[i] != i) return void_err(NULL, "Array value error");
+        }
+        return void_ok(NULL);
+}
 
 typedef struct __test__ {
         void_result (*func)();
@@ -107,13 +127,14 @@ typedef struct __test__ {
 } test;
 
 // Incre
-#define NUM_TESTS (5)
+#define NUM_TESTS (6)
 test tests[NUM_TESTS] = {
         { test_result_err, "Testing if result err works"},
         { test_result_ok, "Testing if result ok works"},
         { test_list_add, "Testing if list add works"},
         { test_array_init, "Testing if array init works"},
-        { test_array_add, "Testing if array add works"}
+        { test_array_add, "Testing if array add works"},
+        { test_array_add_block, "Testing if array add works"}
 };
 
 void print_test_result(const char* name, void_result res)
