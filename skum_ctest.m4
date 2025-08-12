@@ -1,21 +1,40 @@
-C_PRAGMA(once)
-
-C_INCLUDE(<stdint.h>)
-C_INCLUDE(<stdlib.h>)
+#pragma once
+dnl
+dnl This is all the system dependencies
+dnl we need.
+dnl
+#include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
 
 #define i32 int32_t
 #define u8 uint8_t 
-
-C_ALLOCATOR
-C_SHARED_ALLOC
-
+dnl
+C_ALLOCATOR()
+C_SHARED_ALLOC()
+dnl
 C_STRUCT_BEGIN(foo)
-C_STRUCT_FIELD(i32, bar)
+        i32 bar;
 C_STRUCT_END(foo)
-
+dnl
 RESULT_C_FULL(foo)
 RESULT_C_FULL(void)
-
+dnl
 LIST_WITH_NODE_C_STRUCTS(foo)
-RESULT_C_FULL(foo_list_node)
-C_ALLOC_FN(foo_list_node)
+RESULT_C_FULL(foo_list_node)dnl
+RESULT_C_FULL(foo_list)dnl
+C_ALLOC_FN(foo_list_node)dnl
+LIST_C_ADD_FN(foo)dnl
+dnl
+LIST_WITH_NODE_C_STRUCTS(char)dnl
+dnl
+dnl
+ARRAY_C_STRUCT(i32)
+RESULT_C_FULL(i32)
+C_ALLOC_FN(i32)
+dnl
+RESULT_C_FULL(i32_array)
+dnl
+ARRAY_C_NEW(i32)
+ARRAY_C_ADD(i32)
+ARRAY_C_ADD_BLOCK(i32)
