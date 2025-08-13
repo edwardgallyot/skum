@@ -78,7 +78,7 @@ RUN_TEST([[Create a C allocator function]], C_ALLOC_FN(foo),
 static inline foo_result foo_alloc(allocator* alloc, size_t count)
 {
         foo* res = (foo*)allocator_alloc(alloc, sizeof(foo) * count);
-        if (!res) return foo_err(res, "Failed to allocate memory for foo");
+        if (!res) return foo_err("Failed to allocate memory for foo");
         return foo_ok(res);
 }
 ]])dnl
@@ -115,7 +115,7 @@ dnl
 dnl
 RUN_TEST([[C foo Result error function]], RESULT_C_ERR_FN(foo), 
 [[
-static inline foo_result foo_err(foo* t, const char* err)
+static inline foo_result foo_err(const char* err)
 {
         foo_result res;
         res.err = err;
@@ -147,7 +147,7 @@ typedef struct __foo_result__ {
         };
 } foo_result;
 
-static inline foo_result foo_err(foo* t, const char* err)
+static inline foo_result foo_err(const char* err)
 {
         foo_result res;
         res.err = err;
@@ -219,10 +219,10 @@ RUN_TEST([[C array new i32]], ARRAY_C_NEW(i32),
 [[
 static inline i32_array_result i32_array_init(i32_array* array, allocator* alloc, size_t size)
 {
-        if (!array) return i32_array_err(NULL, "no array passed");
-        if (!alloc) return i32_array_err(NULL, "no alloc passed");
+        if (!array) return i32_array_err("no array passed");
+        if (!alloc) return i32_array_err("no alloc passed");
         i32_result data_res = i32_alloc(alloc, size);
-        if (data_res.is_err) return i32_array_err(NULL, data_res.err);
+        if (data_res.is_err) return i32_array_err(data_res.err);
         array->data = data_res.ok;
         array->capacity = size;
         array->count = 0;
@@ -236,8 +236,8 @@ RUN_TEST([[C array add i32]], ARRAY_C_ADD(i32),
 [[
 static inline i32_array_result i32_array_add(i32_array* array, i32 to_add)
 {
-        if (!array) return i32_array_err(NULL, "no array passed");
-        if (array->count >= array->capacity) return i32_array_err(NULL, "out of capacity");
+        if (!array) return i32_array_err("no array passed");
+        if (array->count >= array->capacity) return i32_array_err("out of capacity");
         array->data[array->count] = to_add;
         array->count++;
         return i32_array_ok(array);
@@ -249,8 +249,8 @@ RUN_TEST([[C array block add i32]], ARRAY_C_ADD_BLOCK(i32),
 [[
 static inline i32_array_result i32_array_add_block(i32_array* array, i32* to_add, size_t count)
 {
-        if (!array) return i32_array_err(NULL, "no array passed");
-        if ((array->count + count) > array->capacity) return i32_array_err(NULL, "out of capacity");
+        if (!array) return i32_array_err("no array passed");
+        if ((array->count + count) > array->capacity) return i32_array_err("out of capacity");
         memcpy(array->data + array->count, to_add, count * sizeof(i32));
         array->count += count;
         return i32_array_ok(array);
@@ -263,13 +263,25 @@ RUN_TEST([[C array pop foo]], ARRAY_C_POP(foo),
 [[
 static inline foo_result foo_array_pop(foo_array* array)
 {
-        if (!array) return foo_err(NULL, "no array passed");
-        if (array->count == 0) return foo_err(NULL, "nothing in the array");
+        if (!array) return foo_err("no array passed");
+        if (array->count == 0) return foo_err("nothing in the array");
         foo* to_return = &array->data[--array->count];
         return foo_ok(to_return);
 }
 ]])dnl
 dnl
+RUN_TEST([[C array slice]], ARRAY_C_SLICE(foo),
+[[
+static inline foo_slice_result foo_array_slice(foo_array* array, foo_slice* slice, size_t begin, size_t end)
+{
+        if (!slice)
+        if (begin > array->count) return foo_slice_err("begin out of range");
+        if (end > array->count) return foo_slice_err("end out of range");
+        return foo_slice_ok(slice);
+}
+]])dnl
+dnl
+
 
 Linked list definitions
 =======================
@@ -315,7 +327,7 @@ RUN_TEST([[C Linked List allocate node function]], C_ALLOC_FN(foo_list_node),
 static inline foo_list_node_result foo_list_node_alloc(allocator* alloc, size_t count)
 {
         foo_list_node* res = (foo_list_node*)allocator_alloc(alloc, sizeof(foo_list_node) * count);
-        if (!res) return foo_list_node_err(res, "Failed to allocate memory for foo_list_node");
+        if (!res) return foo_list_node_err("Failed to allocate memory for foo_list_node");
         return foo_list_node_ok(res);
 }
 ]])dnl
@@ -325,8 +337,8 @@ RUN_TEST([[C Linked List add node function]], LIST_C_ADD_FN(foo),
 [[
 static inline foo_list_result foo_list_add(foo_list* list, foo_list_node* node)
 {
-        if (!list) return foo_list_err(list, "No list passed");
-        if (!node) return foo_list_err(list, "No node passed");
+        if (!list) return foo_list_err("No list passed");
+        if (!node) return foo_list_err("No node passed");
         if (!list->head) {
                 list->head = node;
                 return foo_list_ok(list);

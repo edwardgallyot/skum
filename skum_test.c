@@ -8,7 +8,7 @@ void_result init_allocator(allocator* alloc, size_t size)
 {
         if (alloc->mem != NULL) munmap(alloc->mem, alloc->capacity);
         alloc->mem = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-        if (alloc->mem == MAP_FAILED) return void_err(NULL, "Failed to map memory");
+        if (alloc->mem == MAP_FAILED) return void_err("Failed to map memory");
         alloc->count = 0;
         alloc->capacity = size;
         return void_ok(NULL);
@@ -18,15 +18,15 @@ void_result test_result_ok()
 {
         static foo valid_foo;
         foo_result result = foo_ok(&valid_foo);
-        if (result.is_err) return void_err(NULL, "result.is_err failed");
+        if (result.is_err) return void_err("result.is_err failed");
         return void_ok(&valid_foo);
 };
 
 void_result test_result_err()
 {
         static foo invalid_foo;
-        foo_result result = foo_err(NULL, "Error in the foorce");
-        if (!result.is_err) return void_err(NULL, "result.is_err failed");
+        foo_result result = foo_err("Error in the foorce");
+        if (!result.is_err) return void_err("result.is_err failed");
         return void_ok(NULL);
 };
 
@@ -43,18 +43,18 @@ void_result test_list_add()
         };
         foo_list_node* list_nodes;
         foo_list_node_result node_result = foo_list_node_alloc(&alloc, 3);
-        if (node_result.is_err) return void_err(NULL, node_result.err);
+        if (node_result.is_err) return void_err(node_result.err);
         list_nodes = node_result.ok;
         foo_list list;
         for (size_t i = 0; i < num_foos; ++i) {
                 list_nodes[i].data = &foos[i];
                 foo_list_result add_res = foo_list_add(&list, &list_nodes[i]);
-                if (add_res.is_err) return void_err(NULL, add_res.err);
+                if (add_res.is_err) return void_err(add_res.err);
         }
 
         size_t i = 0;
         for (foo_list_node* tmp = list.head; tmp; tmp = tmp->next) {
-                if (tmp->data->bar !=  foos[i].bar) return void_err(NULL, "Mismatch");
+                if (tmp->data->bar !=  foos[i].bar) return void_err("Mismatch");
                 i++;
         }
         return void_ok(NULL);
@@ -69,8 +69,8 @@ void_result test_array_init()
         if (res.is_err) return res;
         i32_array array;        
         i32_array_result init_res = i32_array_init(&array, &alloc, ARRAY_SIZE);
-        if (init_res.is_err) return void_err(NULL, init_res.err);
-        if (array.capacity != ARRAY_SIZE) return void_err(NULL, "Incorrect capacity");
+        if (init_res.is_err) return void_err(init_res.err);
+        if (array.capacity != ARRAY_SIZE) return void_err("Incorrect capacity");
         for (size_t i = 0; i < ARRAY_SIZE; ++i) 
                 array.data[i] = i;
 
@@ -86,15 +86,15 @@ void_result test_array_add()
         if (res.is_err) return res;
         i32_array array;        
         i32_array_result init_res = i32_array_init(&array, &alloc, ARRAY_SIZE);
-        if (init_res.is_err) return void_err(NULL, init_res.err);
-        if (array.capacity != ARRAY_SIZE) return void_err(NULL, "Incorrect capacity");
+        if (init_res.is_err) return void_err(init_res.err);
+        if (array.capacity != ARRAY_SIZE) return void_err("Incorrect capacity");
         for (size_t i = 0; i < 4; ++i) {
                 i32_array_result add_res = i32_array_add(&array, i);
-                if (add_res.is_err) return void_err(NULL, add_res.err);
+                if (add_res.is_err) return void_err(add_res.err);
         }
-        if (array.count != ARRAY_SIZE) return void_err(NULL, "Incorrect count after adding ARRAY_SIZE");
+        if (array.count != ARRAY_SIZE) return void_err("Incorrect count after adding ARRAY_SIZE");
         for (size_t i = 0; i < array.count; ++i) {
-                if (array.data[i] != i) return void_err(NULL, "Array value error");
+                if (array.data[i] != i) return void_err("Array value error");
         }
         return void_ok(NULL);
 #undef ARRAY_SIZE
@@ -108,15 +108,15 @@ void_result test_array_add_block()
         if (res.is_err) return res;
         i32_array array;        
         i32_array_result init_res = i32_array_init(&array, &alloc, ARRAY_SIZE);
-        if (init_res.is_err) return void_err(NULL, init_res.err);
+        if (init_res.is_err) return void_err(init_res.err);
         i32 to_add[ARRAY_SIZE] = {
                 0, 1, 2, 3, 4, 5, 6, 7
         };
-        if (array.capacity != ARRAY_SIZE) return void_err(NULL, "Incorrect capacity");
+        if (array.capacity != ARRAY_SIZE) return void_err("Incorrect capacity");
         i32_array_add_block(&array, to_add, ARRAY_SIZE);
-        if (array.count != ARRAY_SIZE) return void_err(NULL, "Incorrect count after adding ARRAY_SIZE");
+        if (array.count != ARRAY_SIZE) return void_err("Incorrect count after adding ARRAY_SIZE");
         for (size_t i = 0; i < array.count; ++i) {
-                if (array.data[i] != i) return void_err(NULL, "Array value error");
+                if (array.data[i] != i) return void_err("Array value error");
         }
         return void_ok(NULL);
 #undef ARRAY_SIZE
@@ -130,17 +130,17 @@ void_result test_array_pop()
         if (res.is_err) return res;
         i32_array array;        
         i32_array_result init_res = i32_array_init(&array, &alloc, ARRAY_SIZE);
-        if (init_res.is_err) return void_err(NULL, init_res.err);
+        if (init_res.is_err) return void_err(init_res.err);
         i32 to_add[ARRAY_SIZE] = {
                 1, 2, 3, 4, 5, 6, 7, 8
         };
-        if (array.capacity != ARRAY_SIZE) return void_err(NULL, "Incorrect capacity");
+        if (array.capacity != ARRAY_SIZE) return void_err("Incorrect capacity");
         i32_array_add_block(&array, to_add, ARRAY_SIZE);
-        if (array.count != ARRAY_SIZE) return void_err(NULL, "Incorrect count after adding ARRAY_SIZE");
+        if (array.count != ARRAY_SIZE) return void_err("Incorrect count after adding ARRAY_SIZE");
         for (size_t i = ARRAY_SIZE; i != 0 ; --i) {
                 i32_result pop_res = i32_array_pop(&array);
-                if (pop_res.is_err) return void_err(NULL, pop_res.err);
-                if (*pop_res.ok != i) return void_err(NULL, "Invalid value");
+                if (pop_res.is_err) return void_err(pop_res.err);
+                if (*pop_res.ok != i) return void_err("Invalid value");
         }
         return void_ok(NULL);
 #undef ARRAY_SIZE

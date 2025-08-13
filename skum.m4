@@ -95,7 +95,7 @@ dnl (param) T the type of the data in the result.
 dnl
 define([[RESULT_C_ERR_FN]], [[dnl
 DEFINE_RESULT_TYPES($1)dnl
-static inline RESULT_T ERR_FN()(RESULT_DATA_T* t, const char* err)
+static inline RESULT_T ERR_FN()(const char* err)
 {
         RESULT_T res;
         res.err = err;
@@ -176,7 +176,7 @@ DEFINE_RESULT_TYPES($1)
 static inline RESULT_T C_ALLOC_T[[]]_alloc(allocator* alloc, size_t count)
 {
         RESULT_DATA_T* res = (RESULT_DATA_T*)allocator_alloc(alloc, sizeof(RESULT_DATA_T) * count);
-        if (!res) return ERR_FN[[]](res, "Failed to allocate memory for RESULT_DATA_T");
+        if (!res) return ERR_FN[[]]("Failed to allocate memory for RESULT_DATA_T");
         return OK_FN[[]](res);
 }
 UNDEFINE_ALLOC_TYPES[[]]dnl
@@ -236,10 +236,10 @@ UNDEFINE_RESULT_TYPES
 DEFINE_RESULT_TYPES(ARRAY_T)dnl
 static inline RESULT_T ARRAY_T[[]]_init(ARRAY_T* array, allocator* alloc, size_t size)
 {
-        if (!array) return ERR_FN[[]](NULL, "no array passed");
-        if (!alloc) return ERR_FN[[]](NULL, "no alloc passed");
+        if (!array) return ERR_FN[[]]("no array passed");
+        if (!alloc) return ERR_FN[[]]("no alloc passed");
         DATA_RESULT_T data_res = ARRAY_DATA_T[[]]_alloc(alloc, size);
-        if (data_res.is_err) return ERR_FN[[]](NULL, data_res.err);
+        if (data_res.is_err) return ERR_FN[[]](data_res.err);
         array->data = data_res.ok;
         array->capacity = size;
         array->count = 0;
@@ -258,8 +258,8 @@ UNDEFINE_RESULT_TYPES
 DEFINE_RESULT_TYPES(ARRAY_T)dnl
 static inline RESULT_T ARRAY_T[[]]_add(ARRAY_T* array, ARRAY_DATA_T to_add)
 {
-        if (!array) return ERR_FN[[]](NULL, "no array passed");
-        if (array->count >= array->capacity) return ERR_FN[[]](NULL, "out of capacity");
+        if (!array) return ERR_FN[[]]("no array passed");
+        if (array->count >= array->capacity) return ERR_FN[[]]("out of capacity");
         array->data[array->count] = to_add;
         array->count++;
         return OK_FN[[]](array);
@@ -278,8 +278,8 @@ UNDEFINE_RESULT_TYPES()dnl
 DEFINE_RESULT_TYPES(ARRAY_T)dnl
 static inline RESULT_T ARRAY_T[[]]_add_block(ARRAY_T* array, ARRAY_DATA_T* to_add, size_t count)
 {
-        if (!array) return ERR_FN[[]](NULL, "no array passed");
-        if ((array->count + count) > array->capacity) return ERR_FN[[]](NULL, "out of capacity");
+        if (!array) return ERR_FN[[]]("no array passed");
+        if ((array->count + count) > array->capacity) return ERR_FN[[]]("out of capacity");
         memcpy(array->data + array->count, to_add, count * sizeof(ARRAY_DATA_T));
         array->count += count;
         return OK_FN[[]](array);
@@ -295,8 +295,8 @@ define([[ARRAY_C_POP]],
 DEFINE_RESULT_TYPES($1)dnl
 static inline RESULT_T ARRAY_T[[]]_pop(ARRAY_T* array)
 {
-        if (!array) return ERR_FN()(NULL, "no array passed");
-        if (array->count == 0) return ERR_FN()(NULL, "nothing in the array");
+        if (!array) return ERR_FN()("no array passed");
+        if (array->count == 0) return ERR_FN()("nothing in the array");
         ARRAY_DATA_T()* to_return = &array->data[--array->count];
         return OK_FN()(to_return);
 }
@@ -304,6 +304,11 @@ UNDEFINE_ARRAY_TYPES()dnl
 UNDEFINE_RESULT_TYPES()dnl
 ]])
 dnl 
+dnl
+define([[ARRAY_C_SLICE]],
+[[DEFINE_ARRAY_TYPES($1)
+
+]])
 dnl
 dnl Create a generic C list for any T.
 dnl ==================================
@@ -370,8 +375,8 @@ define([[LIST_C_ADD_FN]],
 DEFINE_RESULT_TYPES(LIST_T)
 static inline RESULT_T LIST_T[[]]_add(LIST_T* list, LIST_NODE_T* node)
 {
-        if (!list) return ERR_FN[[]](list, "No list passed");
-        if (!node) return ERR_FN[[]](list, "No node passed");
+        if (!list) return ERR_FN[[]]("No list passed");
+        if (!node) return ERR_FN[[]]("No node passed");
         if (!list->head) {
                 list->head = node;
                 return OK_FN[[]](list);

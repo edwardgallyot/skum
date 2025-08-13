@@ -9,6 +9,7 @@ dnl
 
 #define i32 int32_t
 #define u8 uint8_t 
+#define u32 uint32_t
 dnl
 C_ALLOCATOR()dnl
 C_SHARED_ALLOC()dnl
@@ -19,6 +20,8 @@ C_STRUCT_END(foo)dnl
 dnl
 RESULT_C_FULL(foo)dnl
 RESULT_C_FULL(void)dnl
+dnl
+dnl TODO: Factor this out into LIST_C_FULL
 dnl
 LIST_WITH_NODE_C_STRUCTS(foo)dnl
 RESULT_C_FULL(foo_list_node)dnl
@@ -33,8 +36,9 @@ ARRAY_C_STRUCT(i32)dnl
 RESULT_C_FULL(i32)dnl
 C_ALLOC_FN(i32)dnl
 dnl
-RESULT_C_FULL(i32_array)dnl
 dnl
+dnl TODO: Factor this out into ARRAY_C_FULL
+RESULT_C_FULL(i32_array)dnl
 ARRAY_C_NEW(i32)dnl
 ARRAY_C_ADD(i32)dnl
 ARRAY_C_ADD_BLOCK(i32)dnl
