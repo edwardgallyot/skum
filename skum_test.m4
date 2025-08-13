@@ -61,6 +61,20 @@ typedef struct __allocator__ {
 } allocator;
 ]])dnl
 dnl
+RUN_TEST([[C allocator init function]], C_UNIX_ALLOC_INIT,
+[[
+static void_result init_allocator(allocator* alloc, size_t size)
+{
+        if (alloc->mem != NULL) munmap(alloc->mem, alloc->capacity);
+        alloc->mem = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+        if (alloc->mem == MAP_FAILED) return void_err("Failed to map memory");
+        alloc->count = 0;
+        alloc->capacity = size;
+        return void_ok(NULL);
+}
+]]
+)dnl
+dnl
 RUN_TEST([[C allocator void* function]], C_SHARED_ALLOC,
 [[
 static inline void* allocator_alloc(allocator* alloc, size_t num_bytes)

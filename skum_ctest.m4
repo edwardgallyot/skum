@@ -11,7 +11,10 @@ dnl
 #define u8 uint8_t 
 #define u32 uint32_t
 dnl
+RESULT_C_FULL(void)dnl
+dnl
 C_ALLOCATOR()dnl
+C_UNIX_ALLOC_INIT()dnl
 C_SHARED_ALLOC()dnl
 dnl
 C_STRUCT_BEGIN(foo)dnl
@@ -19,7 +22,6 @@ C_STRUCT_BEGIN(foo)dnl
 C_STRUCT_END(foo)dnl
 dnl
 RESULT_C_FULL(foo)dnl
-RESULT_C_FULL(void)dnl
 dnl
 dnl TODO: Factor this out into LIST_C_FULL
 dnl

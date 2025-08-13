@@ -4,16 +4,6 @@
 
 #include "skum.h"      
 
-void_result init_allocator(allocator* alloc, size_t size)
-{
-        if (alloc->mem != NULL) munmap(alloc->mem, alloc->capacity);
-        alloc->mem = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
-        if (alloc->mem == MAP_FAILED) return void_err("Failed to map memory");
-        alloc->count = 0;
-        alloc->capacity = size;
-        return void_ok(NULL);
-}
-
 void_result test_result_ok()
 {
         static foo valid_foo;
