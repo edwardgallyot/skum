@@ -184,7 +184,7 @@ RUN_TEST([[C slice definition u32]], SLICE_C_STRUCT(u32),
 typedef struct __u32_slice__ u32_slice;
 typedef struct __u32_slice__ {
         u32* data;
-        size_t len;
+        size_t size;
 } u32_slice;
 ]])dnl
 dnl
@@ -270,13 +270,18 @@ static inline foo_result foo_array_pop(foo_array* array)
 }
 ]])dnl
 dnl
+dnl
+dnl
 RUN_TEST([[C array slice]], ARRAY_C_SLICE(foo),
 [[
 static inline foo_slice_result foo_array_slice(foo_array* array, foo_slice* slice, size_t begin, size_t end)
 {
-        if (!slice)
+        if (!slice) return foo_slice_err("no slice passed");
+        if (!array) return foo_slice_err("no array passed");
         if (begin > array->count) return foo_slice_err("begin out of range");
         if (end > array->count) return foo_slice_err("end out of range");
+        slice->data = array->data + begin;
+        slice->size = end - begin;
         return foo_slice_ok(slice);
 }
 ]])dnl

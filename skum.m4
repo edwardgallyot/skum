@@ -198,7 +198,7 @@ define([[SLICE_C_STRUCT]],
 C_FORWARD_STRUCT(SLICE_T)
 C_STRUCT_BEGIN(SLICE_T)
         SLICE_DATA_T* data;
-        size_t len;
+        size_t size;
 C_STRUCT_END(SLICE_T)
 UNDEFINE_SLICE_TYPES()dnl
 ]])dnl
@@ -306,8 +306,19 @@ UNDEFINE_RESULT_TYPES()dnl
 dnl 
 dnl
 define([[ARRAY_C_SLICE]],
-[[DEFINE_ARRAY_TYPES($1)
-
+[[DEFINE_ARRAY_TYPES($1)dnl
+DEFINE_SLICE_TYPES(ARRAY_DATA_T)
+DEFINE_RESULT_TYPES(SLICE_T)
+static inline RESULT_T ARRAY_T[[]]_slice(ARRAY_T* array, SLICE_T* slice, size_t begin, size_t end)
+{
+        if (!slice) return ERR_FN[[]]("no slice passed");
+        if (!array) return ERR_FN[[]]("no array passed");
+        if (begin > array->count) return ERR_FN[[]]("begin out of range");
+        if (end > array->count) return ERR_FN[[]]("end out of range");
+        slice->data = array->data + begin;
+        slice->size = end - begin;
+        return OK_FN[[]](slice);
+}
 ]])
 dnl
 dnl Create a generic C list for any T.

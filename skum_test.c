@@ -146,13 +146,38 @@ void_result test_array_pop()
 #undef ARRAY_SIZE
 }
 
+void_result test_array_slice()
+{
+#define ARRAY_SIZE 8
+        allocator alloc;
+        void_result res = init_allocator(&alloc, 1024);
+        if (res.is_err) return res;
+        i32_array array;        
+        i32_array_result init_res = i32_array_init(&array, &alloc, ARRAY_SIZE);
+        if (init_res.is_err) return void_err(init_res.err);
+        i32 to_add[ARRAY_SIZE] = {
+                1, 2, 3, 4, 5, 6, 7, 8
+        };
+        if (array.capacity != ARRAY_SIZE) return void_err("Incorrect capacity");
+        i32_array_add_block(&array, to_add, ARRAY_SIZE);
+        if (array.count != ARRAY_SIZE) return void_err("Incorrect count after adding ARRAY_SIZE");
+        i32_slice slice;
+        i32_slice_result slice_res = i32_array_slice(&array, &slice, 1, 3);
+        if (slice_res.is_err) return void_err(slice_res.err);
+        for (size_t i = 0; i < slice.size; ++i) {
+                if (slice.data[i] != (i + 2)) return void_err("Incorrect data");
+        }
+        return void_ok(NULL);
+#undef ARRAY_SIZE
+}
+
 typedef struct __test__ {
         void_result (*func)();
         const char* name;
 } test;
 
 // Incre
-#define NUM_TESTS (7)
+#define NUM_TESTS (8)
 test tests[NUM_TESTS] = {
         { test_result_err, "Testing if result err works"},
         { test_result_ok, "Testing if result ok works"},
@@ -160,7 +185,8 @@ test tests[NUM_TESTS] = {
         { test_array_init, "Testing if array init works"},
         { test_array_add, "Testing if array add works"},
         { test_array_add_block, "Testing if array add block works"},
-        { test_array_pop, "Testing if array pop works"}
+        { test_array_pop, "Testing if array pop works"},
+        { test_array_slice, "Testing if array slice works"}
 };
 
 void print_test_result(const char* name, void_result res)

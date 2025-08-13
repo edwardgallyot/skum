@@ -39,8 +39,11 @@ dnl
 dnl
 dnl TODO: Factor this out into ARRAY_C_FULL
 RESULT_C_FULL(i32_array)dnl
+SLICE_C_STRUCT(i32)dnl
+RESULT_C_FULL(i32_slice)dnl
 ARRAY_C_NEW(i32)dnl
 ARRAY_C_ADD(i32)dnl
 ARRAY_C_ADD_BLOCK(i32)dnl
 ARRAY_C_POP(i32)dnl
+ARRAY_C_SLICE(i32)dnl
 dnl
